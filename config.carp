@@ -1,0 +1,3 @@
+(Project.config "title" "carpgamer")
+(Project.config "output-directory" "src")
+(Project.config "generate-only" true)

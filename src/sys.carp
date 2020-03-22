@@ -1,0 +1,7 @@
+(defmodule Sys
+  (register delay (Fn [Int] ()) "delay")
+
+  (hidden init-globals-c)
+  (private init-globals-c)
+  (register init-globals-c (Fn [Int Int] ()) "carp_init_globals")
+  (defn init-carp-globals [] (init-globals-c 0 0)))

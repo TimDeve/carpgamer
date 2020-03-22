@@ -1,0 +1,60 @@
+(system-include "Arduino.h")
+
+(load "config.carp")
+
+(load "src/serial.carp")
+(load "src/arcada.carp")
+(load "src/sys.carp")
+
+(def screen-width 160)
+(def screen-height 128)
+
+(def x-pos 0)
+(def y-pos 0)
+(def size 50)
+(def color 20000)
+
+(sig update (Fn [] ()))
+(defn update []
+  (with Arcada
+    (let-do [buttons (read-buttons)]
+      (if (left-pressed? buttons)
+         (set! x-pos (- x-pos 1)) ())
+      (if (right-pressed? buttons)
+         (set! x-pos (+ x-pos 1)) ())
+      (if (up-pressed? buttons)
+         (set! y-pos (- y-pos 1)) ())
+      (if (down-pressed? buttons)
+         (set! y-pos (+ y-pos 1)) ())
+      (if (a-pressed? buttons)
+         (set! color 20000) ())
+      (if (b-pressed? buttons)
+         (set! color 10000) ())
+      (if (start-pressed? buttons)
+         (set! size (+ size 5)) ())
+      (if (select-pressed? buttons)
+         (set! size (- size 5)) ()))))
+
+(sig draw (Fn [] ()))
+(defn draw []
+  (with Arcada.Canvas
+    (do
+      (fill-screen 0)
+      (draw-rect x-pos, y-pos, size, size, color)
+      (blit 0 0))))
+
+(sig setup (Fn [] ()))
+(defn setup []
+  (do
+   (Sys.init-carp-globals)
+   (Serial.init 74880l)
+   (Arcada.init)
+   (Arcada.init-display)
+   (Arcada.Canvas.init screen-width screen-height)))
+
+(sig loop (Fn [] ()))
+(defn loop []
+  (do
+    (update)
+    (draw)))
+

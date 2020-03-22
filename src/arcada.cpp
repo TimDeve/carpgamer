@@ -1,0 +1,102 @@
+#include <Adafruit_Arcada.h>
+
+#include "arcada.h"
+
+Adafruit_Arcada arcada;
+
+GFXcanvas16 *canvas;
+
+void InitArcada()
+{
+  if (!arcada.arcadaBegin())
+  {
+    Serial.print("Failed to start Arcada");
+    while (true)
+      ;
+  }
+}
+
+void InitDisplay()
+{
+  arcada.displayBegin();
+  arcada.setBacklight(255);
+}
+
+void FillScreen(uint16_t color)
+{
+  arcada.display->fillScreen(color);
+}
+
+void DrawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
+{
+  arcada.display->drawRect(x, y, w, h, color);
+}
+
+void CanvasInit(int w, int h)
+{
+  if (!arcada.createFrameBuffer(w, h))
+  {
+    arcada.haltBox("Failed to allocate framebuffer");
+  }
+  canvas = arcada.getCanvas();
+}
+
+void CanvasFillScreen(uint16_t color)
+{
+  canvas->fillScreen(color);
+}
+
+void CanvasDrawFilledRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
+{
+  canvas->fillRect(x, y, w, h, color);
+}
+
+void CanvasBlit(int x, int y)
+{
+  arcada.blitFrameBuffer(x, y);
+}
+
+uint8_t ReadButtons()
+{
+  return arcada.readButtons();
+}
+
+bool WasButtonAPressed(uint8_t buttons)
+{
+  return buttons & ARCADA_BUTTONMASK_A;
+}
+
+bool WasButtonBPressed(uint8_t buttons)
+{
+  return buttons & ARCADA_BUTTONMASK_B;
+}
+
+bool WasButtonStartPressed(uint8_t buttons)
+{
+  return buttons & ARCADA_BUTTONMASK_START;
+}
+
+bool WasButtonSelectPressed(uint8_t buttons)
+{
+  return buttons & ARCADA_BUTTONMASK_SELECT;
+}
+
+bool WasButtonUpPressed(uint8_t buttons)
+{
+  return buttons & ARCADA_BUTTONMASK_UP;
+}
+
+bool WasButtonRightPressed(uint8_t buttons)
+{
+  return buttons & ARCADA_BUTTONMASK_RIGHT;
+}
+
+bool WasButtonDownPressed(uint8_t buttons)
+{
+  return buttons & ARCADA_BUTTONMASK_DOWN;
+}
+
+bool WasButtonLeftPressed(uint8_t buttons)
+{
+  return buttons & ARCADA_BUTTONMASK_LEFT;
+}

@@ -1,0 +1,25 @@
+(relative-include "arcada.h")
+
+(defmodule Arcada
+  (register init (Fn [] ()) "InitArcada")
+  (register init-display (Fn [] ()) "InitDisplay")
+
+  (register fill-screen (Fn [Int] ()) "FillScreen")
+  (register draw-rect (Fn [Int Int Int Int Int] ()) "DrawRect")
+
+  (defmodule Canvas
+    (register init (Fn [Int Int] ()) "CanvasInit")
+    (register fill-screen (Fn [Int] ()) "CanvasFillScreen")
+    (register draw-rect (Fn [Int Int Int Int Int] ()) "CanvasDrawFilledRect")
+    (register blit (Fn [Int Int] ()) "CanvasBlit"))
+
+  (register read-buttons (Fn [] Int) "ReadButtons")
+  (register a-pressed? (Fn [Int] Bool) "WasButtonAPressed")
+  (register b-pressed? (Fn [Int] Bool) "WasButtonBPressed")
+  (register start-pressed? (Fn [Int] Bool) "WasButtonStartPressed")
+  (register select-pressed? (Fn [Int] Bool) "WasButtonSelectPressed")
+  (register up-pressed? (Fn [Int] Bool) "WasButtonUpPressed")
+  (register right-pressed? (Fn [Int] Bool) "WasButtonRightPressed")
+  (register down-pressed? (Fn [Int] Bool) "WasButtonDownPressed")
+  (register left-pressed? (Fn [Int] Bool) "WasButtonLeftPressed"))
+
