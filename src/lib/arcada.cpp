@@ -51,6 +51,11 @@ void CanvasDrawFilledRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t c
   canvas->fillRect(x, y, w, h, color);
 }
 
+void CanvasDrawFilledCirc(int16_t x0, int16_t y0, int16_t r, uint16_t color)
+{
+  canvas->fillCircle(x0, y0, r, color);
+}
+
 void CanvasBlit(int x, int y)
 {
   arcada.blitFrameBuffer(x, y);
@@ -99,4 +104,14 @@ bool WasButtonDownPressed(uint8_t buttons)
 bool WasButtonLeftPressed(uint8_t buttons)
 {
   return buttons & ARCADA_BUTTONMASK_LEFT;
+}
+
+int16_t ReadJoystickX()
+{
+  return arcada.readJoystickX();
+}
+
+int16_t ReadJoystickY()
+{
+  return arcada.readJoystickY();
 }

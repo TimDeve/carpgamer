@@ -10,9 +10,12 @@
   (defmodule Canvas
     (register init (Fn [Int Int] ()) "CanvasInit")
     (register fill-screen (Fn [Int] ()) "CanvasFillScreen")
-    (register draw-rect (Fn [Int Int Int Int Int] ()) "CanvasDrawFilledRect")
+    (register draw-filled-rect (Fn [Int Int Int Int Int] ()) "CanvasDrawFilledRect")
+    (register draw-filled-circ (Fn [Int Int Int Int] ()) "CanvasDrawFilledCirc")
     (register blit (Fn [Int Int] ()) "CanvasBlit"))
 
+  (register read-joystick-x (Fn [] Int) "ReadJoystickX")
+  (register read-joystick-y (Fn [] Int) "ReadJoystickY")
   (register read-buttons (Fn [] Int) "ReadButtons")
   (register a-pressed? (Fn [Int] Bool) "WasButtonAPressed")
   (register b-pressed? (Fn [Int] Bool) "WasButtonBPressed")

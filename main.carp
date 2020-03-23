@@ -2,52 +2,56 @@
 
 (load "config.carp")
 
-(load "src/serial.carp")
-(load "src/arcada.carp")
-(load "src/sys.carp")
+(load "src/lib/serial.carp")
+(load "src/lib/arcada.carp")
+(load "src/lib/sys.carp")
+(load "src/colors.carp")
 
 (def screen-width 160)
 (def screen-height 128)
 
 (def x-pos 0)
 (def y-pos 0)
-(def size 50)
-(def color 20000)
+
+(sig clean-up-joystick-input (Fn [Int] Int))
+(defn clean-up-joystick-input [input] (/ input 30))
+
+(sig draw-background-circle (Fn [] ()))
+(defn draw-background-circle []
+  (Arcada.Canvas.draw-filled-circ
+    (/ screen-width 2)
+    (/ screen-height 2)
+    22
+    Colors.dark-grey))
+
+(sig draw-player (Fn [] ()))
+(defn draw-player []
+  (Arcada.Canvas.draw-filled-circ
+    (+ (/ screen-width 2) x-pos)
+    (+ (/ screen-height 2) y-pos)
+    5
+    Colors.white))
 
 (sig update (Fn [] ()))
 (defn update []
   (with Arcada
-    (let-do [buttons (read-buttons)]
-      (if (left-pressed? buttons)
-         (set! x-pos (- x-pos 1)) ())
-      (if (right-pressed? buttons)
-         (set! x-pos (+ x-pos 1)) ())
-      (if (up-pressed? buttons)
-         (set! y-pos (- y-pos 1)) ())
-      (if (down-pressed? buttons)
-         (set! y-pos (+ y-pos 1)) ())
-      (if (a-pressed? buttons)
-         (set! color 20000) ())
-      (if (b-pressed? buttons)
-         (set! color 10000) ())
-      (if (start-pressed? buttons)
-         (set! size (+ size 5)) ())
-      (if (select-pressed? buttons)
-         (set! size (- size 5)) ()))))
+    (do
+      (set! x-pos (clean-up-joystick-input (read-joystick-x)))
+      (set! y-pos (clean-up-joystick-input (read-joystick-y))))))
 
 (sig draw (Fn [] ()))
 (defn draw []
   (with Arcada.Canvas
     (do
-      (fill-screen 0)
-      (draw-rect x-pos, y-pos, size, size, color)
+      (fill-screen Colors.darker-grey)
+      (draw-background-circle)
+      (draw-player)
       (blit 0 0))))
 
 (sig setup (Fn [] ()))
 (defn setup []
   (do
    (Sys.init-carp-globals)
-   (Serial.init 74880l)
    (Arcada.init)
    (Arcada.init-display)
    (Arcada.Canvas.init screen-width screen-height)))

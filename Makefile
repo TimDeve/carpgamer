@@ -7,7 +7,7 @@ build_carp_watch:
 	nodemon -w . -x carp --log-memory -b main.carp
 
 clean_carp:
-	rm -f src/main.c
+	rm -rf src/carp-out
 
 build_platform:
 	platformio run --target debug
