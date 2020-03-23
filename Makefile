@@ -3,8 +3,8 @@
 build_carp:
 	carp --log-memory -b main.carp
 
-build_carp_watch:
-	nodemon -w . -x carp --log-memory -b main.carp
+check_carp_watch:
+	nodemon -w . -x carp --check --log-memory -b main.carp
 
 clean_carp:
 	rm -rf src/carp-out
