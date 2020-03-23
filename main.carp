@@ -51,7 +51,7 @@
 (sig setup (Fn [] ()))
 (defn setup []
   (do
-   (Sys.init-carp-globals)
+   (System.carp-init-globals 0 0)
    (Arcada.init)
    (Arcada.init-display)
    (Arcada.Canvas.init screen-width screen-height)))
