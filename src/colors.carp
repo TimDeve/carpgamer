@@ -1,6 +1,6 @@
 (defmodule Colors
   (def white 65535)       ; 0xFFFFFF
   (def black 0)           ; 0x000000
-  (def dark-grey 8452)    ; 0x222222
+  (def dark-grey 12710)   ; 0x333333
   (def darker-grey 4226)) ; 0x111111
 

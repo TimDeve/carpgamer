@@ -10,8 +10,12 @@
 (def screen-width 160)
 (def screen-height 128)
 
-(def x-pos 0)
-(def y-pos 0)
+(deftype Player [x-pos Int, y-pos Int])
+
+(deftype World [player Player])
+
+(sig init-world (Fn [] World))
+(defn init-world [] (World.init (Player.init 0 0)))
 
 (sig clean-up-joystick-input (Fn [Int] Int))
 (defn clean-up-joystick-input [input] (/ input 30))
@@ -24,28 +28,29 @@
     22
     Colors.dark-grey))
 
-(sig draw-player (Fn [] ()))
-(defn draw-player []
+(sig draw-player (Fn [(Ref Player)] ()))
+(defn draw-player [player]
   (Arcada.Canvas.draw-filled-circ
-    (+ (/ screen-width 2) x-pos)
-    (+ (/ screen-height 2) y-pos)
+    (+ (/ screen-width 2) @(Player.x-pos player))
+    (+ (/ screen-height 2) @(Player.y-pos player))
     5
     Colors.white))
 
-(sig update (Fn [] ()))
-(defn update []
+(sig update (Fn [World] World))
+(defn update [world]
   (with Arcada
-    (do
-      (set! x-pos (clean-up-joystick-input (read-joystick-x)))
-      (set! y-pos (clean-up-joystick-input (read-joystick-y))))))
+      (World.init
+        (Player.init
+         (clean-up-joystick-input (read-joystick-x))
+         (clean-up-joystick-input (read-joystick-y))))))
 
-(sig draw (Fn [] ()))
-(defn draw []
+(sig draw (Fn [(Ref World)] ()))
+(defn draw [world]
   (with Arcada.Canvas
     (do
       (fill-screen Colors.darker-grey)
       (draw-background-circle)
-      (draw-player)
+      (draw-player (World.player world))
       (blit 0 0))))
 
 (sig setup (Fn [] ()))
@@ -54,11 +59,14 @@
    (System.carp-init-globals 0 0)
    (Arcada.init)
    (Arcada.init-display)
-   (Arcada.Canvas.init screen-width screen-height)))
+   (Arcada.Canvas.init screen-width screen-height)
+   (let [world (init-world)]
+     (while true
+      (do
+        (set! world (update world))
+        (draw &world))))))
 
+; Don't need loop but it needs to be declared to make Arduino happy
 (sig loop (Fn [] ()))
-(defn loop []
-  (do
-    (update)
-    (draw)))
+(defn loop [] ())
 
