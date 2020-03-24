@@ -19,7 +19,11 @@ void InitArcada()
 void InitDisplay()
 {
   arcada.displayBegin();
-  arcada.setBacklight(255);
+}
+
+void SetBacklight(uint8_t brightness)
+{
+  arcada.setBacklight(brightness);
 }
 
 void FillScreen(uint16_t color)

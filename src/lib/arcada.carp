@@ -3,6 +3,7 @@
 (defmodule Arcada
   (register init (Fn [] ()) "InitArcada")
   (register init-display (Fn [] ()) "InitDisplay")
+  (register set-backlight (Fn [Int] ()) "SetBacklight")
 
   (register fill-screen (Fn [Int] ()) "FillScreen")
   (register draw-rect (Fn [Int Int Int Int Int] ()) "DrawRect")

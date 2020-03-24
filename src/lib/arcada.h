@@ -28,6 +28,7 @@ extern "C"
   bool WasButtonRightPressed(uint8_t buttons);
   bool WasButtonDownPressed(uint8_t buttons);
   bool WasButtonLeftPressed(uint8_t buttons);
+  void SetBacklight(uint8_t brightness);
 
 #ifdef __cplusplus /* If this is a C++ compiler, end C linkage */
 }

@@ -36,6 +36,14 @@
     5
     Colors.white))
 
+(sig init-display (Fn [] ()))
+(defn init-display []
+  (do
+    (Arcada.init-display)
+    (Arcada.fill-screen Colors.darker-grey)
+    (Sys.delay 100) ; Wait a little bit so the display doesn't flash white
+    (Arcada.set-backlight 255)))
+
 (sig update (Fn [World] World))
 (defn update [world]
   (with Arcada
@@ -58,7 +66,7 @@
   (do
    (System.carp-init-globals 0 0)
    (Arcada.init)
-   (Arcada.init-display)
+   (init-display)
    (Arcada.Canvas.init screen-width screen-height)
    (let [world (init-world)]
      (while true
