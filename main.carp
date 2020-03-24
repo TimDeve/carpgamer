@@ -7,15 +7,29 @@
 (load "src/lib/sys.carp")
 (load "src/colors.carp")
 
+(use Array)
+
 (def screen-width 160)
 (def screen-height 128)
 
+(deftype Direction
+  Up
+  Right
+  Down
+  Left)
+
+(deftype Block [x-pos Int, y-pos Int, w Int, h Int, direction Direction])
+
 (deftype Player [x-pos Int, y-pos Int])
 
-(deftype World [player Player])
+(deftype World [player Player blocks (Array Block)])
 
 (sig init-world (Fn [] World))
-(defn init-world [] (World.init (Player.init 0 0)))
+(defn init-world []
+  (World.init
+    (Player.init 0 0)
+    [(Block.init 0 (/ screen-height 2) 10 40  (Direction.Left))
+     (Block.init 40 (/ screen-height 4) 10 40  (Direction.Left))]))
 
 (sig clean-up-joystick-input (Fn [Int] Int))
 (defn clean-up-joystick-input [input] (/ input 30))
@@ -36,21 +50,49 @@
     5
     Colors.white))
 
+(sig draw-blocks (Fn [(Ref (Array Block))] ()))
+(defn draw-blocks [blocks]
+  (for [i 0 (length blocks)]
+    (let [block (unsafe-nth blocks i)]
+      (Arcada.Canvas.draw-filled-rect
+        @(Block.x-pos block)
+        @(Block.y-pos block)
+        @(Block.w block)
+        @(Block.h block)
+        Colors.white))))
+
 (sig init-display (Fn [] ()))
 (defn init-display []
   (do
     (Arcada.init-display)
     (Arcada.fill-screen Colors.darker-grey)
     (Sys.delay 100) ; Wait a little bit so the display doesn't flash white
-    (Arcada.set-backlight 255)))
+    (Arcada.set-backlight 100)))
 
-(sig update (Fn [World] World))
+(sig update-block (Fn [(Ref Block)] Block))
+(defn update-block [block]
+  (match @(Block.direction block)
+    Direction.Up    (if (> @(Block.y-pos block) (* (/ @(Block.h block) 2) -1))
+                      (Block.update-y-pos @block &Int.dec)
+                      (Block.set-y-pos @block (+ screen-height (/ @(Block.h block) 2))))
+    Direction.Right (if (< @(Block.x-pos block) (+ screen-width (/ @(Block.w block) 2)))
+                      (Block.update-x-pos @block &Int.inc)
+                      (Block.set-x-pos @block (* (/ @(Block.w block) 2) -1)))
+    Direction.Down  (if (< @(Block.y-pos block) (+ screen-height (/ @(Block.h block) 2)))
+                      (Block.update-y-pos @block &Int.inc)
+                      (Block.set-y-pos @block (* (/ @(Block.h block) 2) -1)))
+    Direction.Left (if (> @(Block.x-pos block) (* (/ @(Block.w block) 2) -1))
+                      (Block.update-x-pos @block &Int.dec)
+                      (Block.set-x-pos @block (+ screen-width (/ @(Block.w block) 2))))))
+
+(sig update (Fn [(Ref World)] World))
 (defn update [world]
   (with Arcada
       (World.init
         (Player.init
          (clean-up-joystick-input (read-joystick-x))
-         (clean-up-joystick-input (read-joystick-y))))))
+         (clean-up-joystick-input (read-joystick-y)))
+        (copy-map &update-block (World.blocks world)))))
 
 (sig draw (Fn [(Ref World)] ()))
 (defn draw [world]
@@ -59,6 +101,7 @@
       (fill-screen Colors.darker-grey)
       (draw-background-circle)
       (draw-player (World.player world))
+      (draw-blocks (World.blocks world))
       (blit 0 0))))
 
 (sig setup (Fn [] ()))
@@ -71,7 +114,7 @@
    (let [world (init-world)]
      (while true
       (do
-        (set! world (update world))
+        (set! world (update &world))
         (draw &world))))))
 
 ; Don't need loop but it needs to be declared to make Arduino happy
