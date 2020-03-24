@@ -1,10 +1,10 @@
 .DEFAULT_GOAL := build
 
 build_carp:
-	carp --log-memory -b main.carp
+	carp -b main.carp
 
 check_carp_watch:
-	nodemon -w . -x carp --check --log-memory -b main.carp
+	nodemon -w . -x carp --check -b main.carp
 
 clean_carp:
 	rm -rf src/carp-out
