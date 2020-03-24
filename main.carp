@@ -22,14 +22,23 @@
 
 (deftype Player [x-pos Int, y-pos Int])
 
-(deftype World [player Player blocks (Array Block)])
+(deftype WorldState
+  Running
+  Paused
+  Died)
+
+
+(deftype World [state WorldState player Player blocks (Array Block)])
 
 (sig init-world (Fn [] World))
 (defn init-world []
   (World.init
+    (WorldState.Running)
     (Player.init 0 0)
-    [(Block.init 0 (/ screen-height 2) 10 40  (Direction.Left))
-     (Block.init 40 (/ screen-height 4) 10 40  (Direction.Left))]))
+    [(Block.init 0  64 10 40 (Direction.Left))
+     (Block.init 35 22 10 40 (Direction.Left))
+     (Block.init 70 30 10 20 (Direction.Left))
+     (Block.init 70 70 10 20 (Direction.Left))]))
 
 (sig clean-up-joystick-input (Fn [Int] Int))
 (defn clean-up-joystick-input [input] (/ input 30))
@@ -88,11 +97,19 @@
 (sig update (Fn [(Ref World)] World))
 (defn update [world]
   (with Arcada
-      (World.init
-        (Player.init
-         (clean-up-joystick-input (read-joystick-x))
-         (clean-up-joystick-input (read-joystick-y)))
-        (copy-map &update-block (World.blocks world)))))
+    (match @(World.state world)
+      WorldState.Running (World.init
+                          (if (start-pressed? (read-buttons))
+                              (WorldState.Paused)
+                              (WorldState.Running))
+                          (Player.init
+                           (clean-up-joystick-input (read-joystick-x))
+                           (clean-up-joystick-input (read-joystick-y)))
+                          (copy-map &update-block (World.blocks world)))
+
+      _                  (if (start-pressed? (read-buttons))
+                             (World.set-state @world (WorldState.Running))
+                             @world))))
 
 (sig draw (Fn [(Ref World)] ()))
 (defn draw [world]
