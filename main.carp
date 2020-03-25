@@ -94,28 +94,40 @@
                       (Block.update-x-pos @block &Int.dec)
                       (Block.set-x-pos @block (+ screen-width (/ @(Block.w block) 2))))))
 
-(sig update (Fn [(Ref World)] World))
-(defn update [world]
+(sig update-positions (Fn [World] World))
+(defn update-positions [world]
   (with Arcada
-    (let [buttons (read-buttons)
-          just-pressed-buttons (just-pressed-buttons)
-          just-released-buttons (just-released-buttons)
-          joy-x (read-joystick-x)
-          joy-y (read-joystick-y)]
-
-      (match @(World.state world)
+    (let [joy-x (read-joystick-x) joy-y (read-joystick-y)]
+      (match @(World.state &world)
         WorldState.Running (World.init
-                            (if (start-pressed? just-pressed-buttons)
-                                (WorldState.Paused)
-                                (WorldState.Running))
+                            @(World.state &world)
                             (Player.init
                              (clean-up-joystick-input joy-x)
                              (clean-up-joystick-input joy-y))
-                            (copy-map &update-block (World.blocks world)))
+                            (copy-map &update-block (World.blocks &world)))
+
+        _                 world))))
+
+(sig update-state (Fn [World] World))
+(defn update-state [world]
+  (with Arcada
+    (let [buttons (read-buttons) just-pressed-buttons (just-pressed-buttons)]
+      (match @(World.state &world)
+        WorldState.Running (World.set-state
+                              world
+                              (if (start-pressed? just-pressed-buttons)
+                                  (WorldState.Paused)
+                                  (WorldState.Running)))
 
         _                  (if (start-pressed? just-pressed-buttons)
-                               (World.set-state @world (WorldState.Running))
-                               @world)))))
+                               (World.set-state world (WorldState.Running))
+                               world)))))
+
+(sig update (Fn [World] World))
+(defn update [world]
+  (==> world
+   (update-positions)
+   (update-state)))
 
 (sig draw (Fn [(Ref World)] ()))
 (defn draw [world]
@@ -137,7 +149,7 @@
    (let [world (init-world)]
      (while true
       (do
-        (set! world (update &world))
+        (set! world (update world))
         (draw &world))))))
 
 ; Don't need loop but it needs to be declared to make Arduino happy
