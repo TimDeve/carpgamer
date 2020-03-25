@@ -133,11 +133,17 @@
 (defn draw [world]
   (with Arcada.Canvas
     (do
-      (fill-screen Colors.darker-grey)
-      (draw-background-circle)
-      (draw-player (World.player world))
-      (draw-blocks (World.blocks world))
-      (blit 0 0))))
+     (fill-screen Colors.darker-grey)
+     (draw-background-circle)
+     (draw-player (World.player world))
+     (draw-blocks (World.blocks world))
+     (blit 0 0))))
+
+(sig game-loop (Fn [World] ()))
+(defn game-loop [world]
+  (forever-do
+   (set! world (update world))
+   (draw &world)))
 
 (sig setup (Fn [] ()))
 (defn setup []
@@ -146,11 +152,7 @@
    (Arcada.init)
    (init-display)
    (Arcada.Canvas.init screen-width screen-height)
-   (let [world (init-world)]
-     (while true
-      (do
-        (set! world (update world))
-        (draw &world))))))
+   (game-loop (init-world))))
 
 ; Don't need loop but it needs to be declared to make Arduino happy
 (sig loop (Fn [] ()))
