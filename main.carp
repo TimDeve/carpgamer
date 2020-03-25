@@ -61,14 +61,13 @@
 
 (sig draw-blocks (Fn [(Ref (Array Block))] ()))
 (defn draw-blocks [blocks]
-  (for [i 0 (length blocks)]
-    (let [block (unsafe-nth blocks i)]
-      (Arcada.Canvas.draw-filled-rect
-        @(Block.x-pos block)
-        @(Block.y-pos block)
-        @(Block.w block)
-        @(Block.h block)
-        Colors.white))))
+  (foreach [block blocks]
+    (Arcada.Canvas.draw-filled-rect
+      @(Block.x-pos block)
+      @(Block.y-pos block)
+      @(Block.w block)
+      @(Block.h block)
+      Colors.white)))
 
 (sig init-display (Fn [] ()))
 (defn init-display []
