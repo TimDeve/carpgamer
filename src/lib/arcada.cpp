@@ -65,9 +65,19 @@ void CanvasBlit(int x, int y)
   arcada.blitFrameBuffer(x, y);
 }
 
-uint8_t ReadButtons()
+uint32_t ReadButtons()
 {
   return arcada.readButtons();
+}
+
+uint32_t JustPressedButtons()
+{
+  return arcada.justPressedButtons();
+}
+
+uint32_t JustReleasedButtons()
+{
+  return arcada.justReleasedButtons();
 }
 
 bool WasButtonAPressed(uint8_t buttons)

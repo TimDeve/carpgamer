@@ -23,10 +23,10 @@
 (deftype Player [x-pos Int, y-pos Int])
 
 (deftype WorldState
+  Intro
   Running
   Paused
   Died)
-
 
 (deftype World [state WorldState player Player blocks (Array Block)])
 
@@ -76,7 +76,7 @@
     (Arcada.init-display)
     (Arcada.fill-screen Colors.darker-grey)
     (Sys.delay 100) ; Wait a little bit so the display doesn't flash white
-    (Arcada.set-backlight 100)))
+    (Arcada.set-backlight 255)))
 
 (sig update-block (Fn [(Ref Block)] Block))
 (defn update-block [block]
@@ -97,19 +97,25 @@
 (sig update (Fn [(Ref World)] World))
 (defn update [world]
   (with Arcada
-    (match @(World.state world)
-      WorldState.Running (World.init
-                          (if (start-pressed? (read-buttons))
-                              (WorldState.Paused)
-                              (WorldState.Running))
-                          (Player.init
-                           (clean-up-joystick-input (read-joystick-x))
-                           (clean-up-joystick-input (read-joystick-y)))
-                          (copy-map &update-block (World.blocks world)))
+    (let [buttons (read-buttons)
+          just-pressed-buttons (just-pressed-buttons)
+          just-released-buttons (just-released-buttons)
+          joy-x (read-joystick-x)
+          joy-y (read-joystick-y)]
 
-      _                  (if (start-pressed? (read-buttons))
-                             (World.set-state @world (WorldState.Running))
-                             @world))))
+      (match @(World.state world)
+        WorldState.Running (World.init
+                            (if (start-pressed? just-pressed-buttons)
+                                (WorldState.Paused)
+                                (WorldState.Running))
+                            (Player.init
+                             (clean-up-joystick-input joy-x)
+                             (clean-up-joystick-input joy-y))
+                            (copy-map &update-block (World.blocks world)))
+
+        _                  (if (start-pressed? just-pressed-buttons)
+                               (World.set-state @world (WorldState.Running))
+                               @world)))))
 
 (sig draw (Fn [(Ref World)] ()))
 (defn draw [world]

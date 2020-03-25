@@ -19,7 +19,9 @@ extern "C"
 
   int16_t ReadJoystickX();
   int16_t ReadJoystickY();
-  uint8_t ReadButtons();
+  uint32_t ReadButtons();
+  uint32_t JustPressedButtons();
+  uint32_t JustReleasedButtons();
   bool WasButtonAPressed(uint8_t buttons);
   bool WasButtonBPressed(uint8_t buttons);
   bool WasButtonStartPressed(uint8_t buttons);

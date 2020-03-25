@@ -15,9 +15,14 @@
     (register draw-filled-circ (Fn [Int Int Int Int] ()) "CanvasDrawFilledCirc")
     (register blit (Fn [Int Int] ()) "CanvasBlit"))
 
+  (deftype Joystick [x Int y Int])
   (register read-joystick-x (Fn [] Int) "ReadJoystickX")
   (register read-joystick-y (Fn [] Int) "ReadJoystickY")
+  (defn read-joystick [] (Joystick.init (read-joystick-x) (read-joystick-y)))
+
   (register read-buttons (Fn [] Int) "ReadButtons")
+  (register just-pressed-buttons (Fn [] Int) "JustPressedButtons")
+  (register just-released-buttons (Fn [] Int) "JustReleasedButtons")
   (register a-pressed? (Fn [Int] Bool) "WasButtonAPressed")
   (register b-pressed? (Fn [Int] Bool) "WasButtonBPressed")
   (register start-pressed? (Fn [Int] Bool) "WasButtonStartPressed")
