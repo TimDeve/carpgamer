@@ -12,6 +12,8 @@
 (def screen-width 160)
 (def screen-height 128)
 
+(def player-radius 5)
+
 (deftype Direction
   Up
   Right
@@ -34,11 +36,15 @@
 (defn init-world []
   (World.init
     (WorldState.Running)
-    (Player.init 0 0)
-    [(Block.init 0  64 10 40 (Direction.Left))
-     (Block.init 35 22 10 40 (Direction.Left))
-     (Block.init 70 30 10 20 (Direction.Left))
-     (Block.init 70 70 10 20 (Direction.Left))]))
+    (Player.init (/ screen-width 2) (/ screen-height 2))
+    [(Block.init 160 64 10 40 (Direction.Left))
+     (Block.init 195 22 10 40 (Direction.Left))
+     (Block.init 235 30 10 20 (Direction.Left))
+     (Block.init 235 70 10 20 (Direction.Left))]))
+
+(sig init-intro-world (Fn [] World))
+(defn init-intro-world []
+  (World.set-state (init-world) (WorldState.Intro)))
 
 (sig clean-up-joystick-input (Fn [Int] Int))
 (defn clean-up-joystick-input [input] (/ input 30))
@@ -54,9 +60,9 @@
 (sig draw-player (Fn [(Ref Player)] ()))
 (defn draw-player [player]
   (Arcada.Canvas.draw-filled-circ
-    (+ (/ screen-width 2) @(Player.x-pos player))
-    (+ (/ screen-height 2) @(Player.y-pos player))
-    5
+    @(Player.x-pos player)
+    @(Player.y-pos player)
+    player-radius
     Colors.white))
 
 (sig draw-blocks (Fn [(Ref (Array Block))] ()))
@@ -69,6 +75,18 @@
       @(Block.h block)
       Colors.white)))
 
+(sig maybe-draw-death-screen (Fn [WorldState] ()))
+(defn maybe-draw-death-screen [world-state]
+  (match world-state
+    WorldState.Died (Arcada.Canvas.draw-filled-rect 0 0 100 10 Colors.light-red)
+    _               ()))
+
+(sig maybe-draw-start-screen (Fn [WorldState] ()))
+(defn maybe-draw-start-screen [world-state]
+  (match world-state
+    WorldState.Intro (Arcada.Canvas.draw-filled-rect 0 0 100 10 Colors.light-blue)
+    _                ()))
+
 (sig init-display (Fn [] ()))
 (defn init-display []
   (do
@@ -77,6 +95,7 @@
     (Sys.delay 100) ; Wait a little bit so the display doesn't flash white
     (Arcada.set-backlight 255)))
 
+; Most of this code is temporary, blocks will be randomly generated
 (sig update-block (Fn [(Ref Block)] Block))
 (defn update-block [block]
   (match @(Block.direction block)
@@ -101,16 +120,60 @@
         WorldState.Running (World.init
                             @(World.state &world)
                             (Player.init
-                             (clean-up-joystick-input joy-x)
-                             (clean-up-joystick-input joy-y))
+                              (+ (/ screen-width 2) (clean-up-joystick-input joy-x))
+                              (+ (/ screen-height 2) (clean-up-joystick-input joy-y)))
                             (copy-map &update-block (World.blocks &world)))
 
         _                 world))))
 
-(sig update-state (Fn [World] World))
-(defn update-state [world]
+(sig get-y-collision (Fn [(Ref Player) (Ref Block)] Int))
+(defn get-y-collision [player block]
+ (let [py (Player.y-pos player) by (Block.y-pos block) bh (Block.h block)]
+  (if (< py by)
+    @by
+    (+ @bh @by))))
+
+(sig get-x-collision (Fn [(Ref Player) (Ref Block)] Int))
+(defn get-x-collision [player block]
+ (let [px (Player.x-pos player) bx (Block.x-pos block) bw (Block.w block)]
+  (if (< px bx)
+    @bx
+    (+ @bw @bx))))
+
+(sig player-coliding-with-block? (Fn [(Ref Player) (Ref Block)] Bool))
+(defn player-coliding-with-block? [player block]
+  (let [dist-x (- @(Player.x-pos player) (get-x-collision player block))
+        dist-y (- @(Player.y-pos player) (get-y-collision player block))
+        distance (Float.sqrt (Float.from-int (+ (* dist-x dist-x) (* dist-y dist-y))))]
+   (<= (Float.to-int distance) player-radius)))
+
+; Had to comment out the sig because the compiler complains about the lambda
+;(sig players-coliding-with-block? (Fn [(Ref Player) (Ref (Array Block))] Bool))
+(defn players-coliding-with-block? [player blocks]
+ (any?
+    &(fn [block]
+      (player-coliding-with-block? player block))
+    blocks))
+
+(sig check-collisions (Fn [World] World))
+(defn check-collisions [world]
+  (match @(World.state &world)
+    WorldState.Running (let [coliding (players-coliding-with-block?
+                                        (World.player &world)
+                                        (World.blocks &world))]
+                        (World.set-state
+                         world
+                         (if coliding
+                             (WorldState.Died)
+                             (WorldState.Running))))
+
+
+    _                  world))
+
+(sig check-for-pause (Fn [World] World))
+(defn check-for-pause [world]
   (with Arcada
-    (let [buttons (read-buttons) just-pressed-buttons (just-pressed-buttons)]
+    (let [just-pressed-buttons (just-pressed-buttons)]
       (match @(World.state &world)
         WorldState.Running (World.set-state
                               world
@@ -118,15 +181,37 @@
                                   (WorldState.Paused)
                                   (WorldState.Running)))
 
-        _                  (if (start-pressed? just-pressed-buttons)
-                               (World.set-state world (WorldState.Running))
-                               world)))))
+        WorldState.Paused (if (start-pressed? just-pressed-buttons)
+                              (World.set-state world (WorldState.Running))
+                              world)
+
+       _                  world))))
+
+(sig check-for-game-start (Fn [World] World))
+(defn check-for-game-start [world]
+  (with Arcada
+    (let [just-pressed-buttons (just-pressed-buttons)]
+      (match @(World.state &world)
+        WorldState.Died  (if (start-pressed? just-pressed-buttons)
+                             (init-world)
+                             world)
+
+        WorldState.Intro (if (start-pressed? just-pressed-buttons)
+                             (init-world)
+                             world)
+
+       _                 world))))
 
 (sig update (Fn [World] World))
 (defn update [world]
-  (==> world
-   (update-positions)
-   (update-state)))
+  ; read-buttons need to be read only once per tick or it'll break
+  ; just-pressed-buttons and just-released-buttons
+  (let [_buttons (Arcada.read-buttons)]
+    (==> world
+     (update-positions)
+     (check-collisions)
+     (check-for-pause)
+     (check-for-game-start))))
 
 (sig draw (Fn [(Ref World)] ()))
 (defn draw [world]
@@ -136,6 +221,8 @@
      (draw-background-circle)
      (draw-player (World.player world))
      (draw-blocks (World.blocks world))
+     (maybe-draw-death-screen @(World.state world))
+     (maybe-draw-start-screen @(World.state world))
      (blit 0 0))))
 
 (sig game-loop (Fn [World] ()))
@@ -151,7 +238,7 @@
    (Arcada.init)
    (init-display)
    (Arcada.Canvas.init screen-width screen-height)
-   (game-loop (init-world))))
+   (game-loop (init-intro-world))))
 
 ; Don't need loop but it needs to be declared to make Arduino happy
 (sig loop (Fn [] ()))

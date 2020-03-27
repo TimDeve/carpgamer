@@ -1,4 +1,8 @@
 (defmodule Colors
+  (def blue 31)           ; 0x0000FF
+  (def light-blue 52895)  ; 0xD1D1FF
+  (def red 63488)         ; 0xFF0000
+  (def light-red 65177)   ; 0xFFD1D1
   (def white 65535)       ; 0xFFFFFF
   (def black 0)           ; 0x000000
   (def dark-grey 12710)   ; 0x333333
