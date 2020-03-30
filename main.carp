@@ -37,7 +37,7 @@
   (World.init
     (WorldState.Running)
     (Player.init (/ screen-width 2) (/ screen-height 2))
-    [(Block.init 160 64 10 40 (Direction.Left))
+    [(Block.init 160 0  10 40 (Direction.Left))
      (Block.init 195 22 10 40 (Direction.Left))
      (Block.init 235 30 10 20 (Direction.Left))
      (Block.init 235 70 10 20 (Direction.Left))]))
@@ -129,23 +129,27 @@
 (sig get-y-collision (Fn [(Ref Player) (Ref Block)] Int))
 (defn get-y-collision [player block]
  (let [py (Player.y-pos player) by (Block.y-pos block) bh (Block.h block)]
-  (if (< py by)
+  (if (< @py @by)
     @by
-    (+ @bh @by))))
+    (if (> @py (+ @bh @by))
+      (+ @bh @by)
+      @py))))
 
 (sig get-x-collision (Fn [(Ref Player) (Ref Block)] Int))
 (defn get-x-collision [player block]
  (let [px (Player.x-pos player) bx (Block.x-pos block) bw (Block.w block)]
-  (if (< px bx)
+  (if (< @px @bx)
     @bx
-    (+ @bw @bx))))
+    (if (> @px (+ @bw @bx))
+      (+ @bx @bx)
+      @px))))
 
 (sig player-coliding-with-block? (Fn [(Ref Player) (Ref Block)] Bool))
 (defn player-coliding-with-block? [player block]
   (let [dist-x (- @(Player.x-pos player) (get-x-collision player block))
         dist-y (- @(Player.y-pos player) (get-y-collision player block))
         distance (Float.sqrt (Float.from-int (+ (* dist-x dist-x) (* dist-y dist-y))))]
-   (<= (Float.to-int distance) player-radius)))
+   (<= distance (Float.from-int player-radius))))
 
 ; Had to comment out the sig because the compiler complains about the lambda
 ;(sig players-coliding-with-block? (Fn [(Ref Player) (Ref (Array Block))] Bool))
