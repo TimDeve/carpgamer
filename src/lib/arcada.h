@@ -15,6 +15,7 @@ extern "C"
   void CanvasFillScreen(uint16_t color);
   void CanvasDrawFilledRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
   void CanvasDrawFilledCirc(int16_t x0, int16_t y0, int16_t r, uint16_t color);
+  void CanvasDrawText(int x, int y, int size, char *str);
   void CanvasBlit(int x, int y);
 
   int16_t ReadJoystickX();

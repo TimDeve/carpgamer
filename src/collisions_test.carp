@@ -1,0 +1,67 @@
+(load "Test.carp")
+
+(load "models.carp")
+(load "collisions.carp")
+
+
+(use Test)
+
+(deftest test
+  (assert-false test
+                (player-colliding-with-block?
+                  &(Player.init 0 10)
+                  &(Block.init 6 0 10 20 (Direction.Left)))
+                "player-colliding-with-block? - Shouldn't collide - left side")
+
+  (assert-true test
+               (player-colliding-with-block?
+                 &(Player.init 0 10)
+                 &(Block.init 5 0 10 20 (Direction.Left)))
+               "player-colliding-with-block? - Should collide - right side")
+
+  (assert-false test
+                (player-colliding-with-block?
+                  &(Player.init 5 26)
+                  &(Block.init 0 0 10 20 (Direction.Left)))
+                "player-colliding-with-block? - Shouldn't collide - bottom side")
+
+  (assert-true test
+               (player-colliding-with-block?
+                 &(Player.init 5 25)
+                 &(Block.init 0 0 10 20 (Direction.Left)))
+               "player-colliding-with-block? - Should collide - bottom side")
+
+  (assert-false test
+                (player-colliding-with-block?
+                  &(Player.init 16 5)
+                  &(Block.init 0 0 10 20 (Direction.Left)))
+                "player-colliding-with-block? - Shouldn't collide - right side")
+
+  (assert-true test
+               (player-colliding-with-block?
+                 &(Player.init 14 5)
+                 &(Block.init 0 0 10 20 (Direction.Left)))
+               "player-colliding-with-block? - Should collide - right side")
+
+  (assert-false test
+               (player-colliding-with-block?
+                 &(Player.init 97 57)
+                 &(Block.init 50 22 10 40 (Direction.Left)))
+               "player-colliding-with-block? - Shouldn't collide - far away")
+
+
+
+  (assert-false test
+                (player-colliding-with-blocks?
+                  &(Player.init 80 64)
+                  &[(Block.init 42 22 10 40 (Direction.Left))
+                    (Block.init 82 30 10 20 (Direction.Left))
+                    (Block.init 82 70 10 20 (Direction.Left))])
+                "player-colliding-with-blocks? - Shouldn't collide 1")
+
+  (assert-false test
+                (player-colliding-with-blocks?
+                  &(Player.init 69 56)
+                  &[(Block.init 36 22 10 40 (Direction.Left))])
+                "player-colliding-with-blocks? - Shouldn't collide 2"))
+

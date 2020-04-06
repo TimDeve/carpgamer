@@ -1,0 +1,20 @@
+(def player-radius 5)
+
+(deftype Direction
+  Up
+  Right
+  Down
+  Left)
+
+(deftype Block [x-pos Int, y-pos Int, w Int, h Int, direction Direction])
+
+(deftype Player [x-pos Int, y-pos Int])
+
+(deftype WorldState
+  Intro
+  Running
+  Paused
+  Died)
+
+(deftype World [state WorldState player Player blocks (Array Block)])
+

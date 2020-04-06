@@ -9,6 +9,9 @@ check_carp_watch:
 clean_carp:
 	rm -rf src/carp-out
 
+test_carp:
+	carp -x src/collisions_test.carp
+
 build_platform:
 	platformio run --target debug
 

@@ -5,40 +5,23 @@
 (load "src/lib/serial.carp")
 (load "src/lib/arcada.carp")
 (load "src/lib/sys.carp")
+(load "src/models.carp")
+(load "src/collisions.carp")
 (load "src/colors.carp")
 
 (use Array)
 
+(def debug false)
+
 (def screen-width 160)
 (def screen-height 128)
-
-(def player-radius 5)
-
-(deftype Direction
-  Up
-  Right
-  Down
-  Left)
-
-(deftype Block [x-pos Int, y-pos Int, w Int, h Int, direction Direction])
-
-(deftype Player [x-pos Int, y-pos Int])
-
-(deftype WorldState
-  Intro
-  Running
-  Paused
-  Died)
-
-(deftype World [state WorldState player Player blocks (Array Block)])
 
 (sig init-world (Fn [] World))
 (defn init-world []
   (World.init
     (WorldState.Running)
     (Player.init (/ screen-width 2) (/ screen-height 2))
-    [(Block.init 160 0  10 40 (Direction.Left))
-     (Block.init 195 22 10 40 (Direction.Left))
+    [(Block.init 195 22 10 40 (Direction.Left))
      (Block.init 235 30 10 20 (Direction.Left))
      (Block.init 235 70 10 20 (Direction.Left))]))
 
@@ -87,6 +70,27 @@
     WorldState.Intro (Arcada.Canvas.draw-filled-rect 0 0 100 10 Colors.light-blue)
     _                ()))
 
+;(sig maybe-draw-debug (Fn [(Ref Player) (Ref (Array Block))] ()))
+(defn maybe-draw-debug [player blocks]
+  (if debug
+    (with Arcada.Canvas
+      (do
+        (draw-text 0 90 1 (String.concat &[@"Player:"
+                                           @" "
+                                           (str (Player.x-pos player))
+                                           @" "
+                                           (str (Player.y-pos player))]))
+        (draw-text 0 100 1 (String.concat
+                              &(Array.copy-map
+                                 &(fn [block]
+                                      (String.concat
+                                        &[(str (Block.x-pos block))
+                                          @" "
+                                          (str (Block.y-pos block))
+                                          @"\n"]))
+                                 blocks)))))
+    ()))
+
 (sig init-display (Fn [] ()))
 (defn init-display []
   (do
@@ -126,48 +130,15 @@
 
         _                 world))))
 
-(sig get-y-collision (Fn [(Ref Player) (Ref Block)] Int))
-(defn get-y-collision [player block]
- (let [py (Player.y-pos player) by (Block.y-pos block) bh (Block.h block)]
-  (if (< @py @by)
-    @by
-    (if (> @py (+ @bh @by))
-      (+ @bh @by)
-      @py))))
-
-(sig get-x-collision (Fn [(Ref Player) (Ref Block)] Int))
-(defn get-x-collision [player block]
- (let [px (Player.x-pos player) bx (Block.x-pos block) bw (Block.w block)]
-  (if (< @px @bx)
-    @bx
-    (if (> @px (+ @bw @bx))
-      (+ @bx @bx)
-      @px))))
-
-(sig player-coliding-with-block? (Fn [(Ref Player) (Ref Block)] Bool))
-(defn player-coliding-with-block? [player block]
-  (let [dist-x (- @(Player.x-pos player) (get-x-collision player block))
-        dist-y (- @(Player.y-pos player) (get-y-collision player block))
-        distance (Float.sqrt (Float.from-int (+ (* dist-x dist-x) (* dist-y dist-y))))]
-   (<= distance (Float.from-int player-radius))))
-
-; Had to comment out the sig because the compiler complains about the lambda
-;(sig players-coliding-with-block? (Fn [(Ref Player) (Ref (Array Block))] Bool))
-(defn players-coliding-with-block? [player blocks]
- (any?
-    &(fn [block]
-      (player-coliding-with-block? player block))
-    blocks))
-
 (sig check-collisions (Fn [World] World))
 (defn check-collisions [world]
   (match @(World.state &world)
-    WorldState.Running (let [coliding (players-coliding-with-block?
+    WorldState.Running (let [colliding (player-colliding-with-blocks?
                                         (World.player &world)
                                         (World.blocks &world))]
                         (World.set-state
                          world
-                         (if coliding
+                         (if colliding
                              (WorldState.Died)
                              (WorldState.Running))))
 
@@ -227,6 +198,7 @@
      (draw-blocks (World.blocks world))
      (maybe-draw-death-screen @(World.state world))
      (maybe-draw-start-screen @(World.state world))
+     (maybe-draw-debug (World.player world) (World.blocks world))
      (blit 0 0))))
 
 (sig game-loop (Fn [World] ()))

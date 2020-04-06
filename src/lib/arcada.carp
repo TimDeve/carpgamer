@@ -13,6 +13,7 @@
     (register fill-screen (Fn [Int] ()) "CanvasFillScreen")
     (register draw-filled-rect (Fn [Int Int Int Int Int] ()) "CanvasDrawFilledRect")
     (register draw-filled-circ (Fn [Int Int Int Int] ()) "CanvasDrawFilledCirc")
+    (register draw-text (Fn [Int Int Int String] ()) "CanvasDrawText")
     (register blit (Fn [Int Int] ()) "CanvasBlit"))
 
   (deftype Joystick [x Int y Int])
