@@ -21,7 +21,7 @@
   (World.init
     (WorldState.Running)
     (Player.init (/ screen-width 2) (/ screen-height 2))
-    [(Block.init 195 22 10 40 (Direction.Left))
+    [(Block.init 195 22 10 30 (Direction.Left))
      (Block.init 235 30 10 20 (Direction.Left))
      (Block.init 235 70 10 20 (Direction.Left))]))
 
@@ -70,8 +70,7 @@
     WorldState.Intro (Arcada.Canvas.draw-filled-rect 0 0 100 10 Colors.light-blue)
     _                ()))
 
-; Had to comment out the sig because the compiler complains about the lambda
-; (sig maybe-draw-debug (Fn [(Ref Player) (Ref (Array Block))] ()))
+;(sig maybe-draw-debug (Fn [(Ref Player) (Ref (Array Block))] ()))
 (defn maybe-draw-debug [player blocks]
   (if debug
     (with Arcada.Canvas
@@ -104,18 +103,10 @@
 (sig update-block (Fn [(Ref Block)] Block))
 (defn update-block [block]
   (match @(Block.direction block)
-    Direction.Up    (if (> @(Block.y-pos block) (* (/ @(Block.h block) 2) -1))
-                      (Block.update-y-pos @block &Int.dec)
-                      (Block.set-y-pos @block (+ screen-height (/ @(Block.h block) 2))))
-    Direction.Right (if (< @(Block.x-pos block) (+ screen-width (/ @(Block.w block) 2)))
-                      (Block.update-x-pos @block &Int.inc)
-                      (Block.set-x-pos @block (* (/ @(Block.w block) 2) -1)))
-    Direction.Down  (if (< @(Block.y-pos block) (+ screen-height (/ @(Block.h block) 2)))
-                      (Block.update-y-pos @block &Int.inc)
-                      (Block.set-y-pos @block (* (/ @(Block.h block) 2) -1)))
-    Direction.Left (if (> @(Block.x-pos block) (* (/ @(Block.w block) 2) -1))
-                      (Block.update-x-pos @block &Int.dec)
-                      (Block.set-x-pos @block (+ screen-width (/ @(Block.w block) 2))))))
+    Direction.Up    (Block.update-y-pos @block &Int.dec)
+    Direction.Right (Block.update-x-pos @block &Int.inc)
+    Direction.Down  (Block.update-y-pos @block &Int.inc)
+    Direction.Left  (Block.update-x-pos @block &Int.dec)))
 
 (sig update-positions (Fn [World] World))
 (defn update-positions [world]
@@ -130,6 +121,24 @@
                             (copy-map &update-block (World.blocks &world)))
 
         _                 world))))
+
+
+(sig block-should-not-be-removed? (Fn [(Ref Block)] Bool))
+(defn block-should-not-be-removed? [block]
+  (match @(Block.direction block)
+     Direction.Up    (> @(Block.y-pos block) (* (/ @(Block.h block) 2) -1))
+     Direction.Right (< @(Block.x-pos block) (+ screen-width (/ @(Block.w block) 2)))
+     Direction.Down  (< @(Block.y-pos block) (+ screen-height (/ @(Block.h block) 2)))
+     Direction.Left  (> @(Block.x-pos block) (* (/ @(Block.w block) 2) -1))))
+
+(sig remove-blocks (Fn [World] World))
+(defn remove-blocks [world]
+  (match @(World.state &world)
+    WorldState.Running (World.set-blocks world
+                                         (endo-filter
+                                           &block-should-not-be-removed?
+                                           @(World.blocks &world)))
+    _                  world))
 
 (sig check-collisions (Fn [World] World))
 (defn check-collisions [world]
@@ -186,6 +195,7 @@
     (==> world
      (update-positions)
      (check-collisions)
+     (remove-blocks)
      (check-for-pause)
      (check-for-game-start))))
 
