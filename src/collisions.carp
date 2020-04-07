@@ -2,33 +2,37 @@
 
 (use Array)
 
-(sig get-y-collision (Fn [(Ref Player) (Ref Block)] Int))
-(defn get-y-collision [player block]
- (let [py @(Player.y-pos player) by @(Block.y-pos block) bh @(Block.h block)]
-  (if (< py by)
-    by
-    (if (> py (+ bh by))
-      (+ bh by)
-      py))))
+(sig get-y-distance (Fn [(Ref Player) (Ref Block)] Int))
+(defn get-y-distance [player block]
+ (let [player-y-pos @(Player.y-pos player)
+       block-y-pos  @(Block.y-pos block)
+       block-height @(Block.h block)]
+  (if (< player-y-pos block-y-pos)
+      block-y-pos
+      (if (> player-y-pos (+ block-height block-y-pos))
+          (+ block-height block-y-pos)
+          player-y-pos))))
 
-(sig get-x-collision (Fn [(Ref Player) (Ref Block)] Int))
-(defn get-x-collision [player block]
- (let [px @(Player.x-pos player) bx @(Block.x-pos block) bw @(Block.w block)]
-  (if (< px bx)
-    bx
-    (if (> px (+ bw bx))
-      (+ bw bx)
-      px))))
+(sig get-x-distance (Fn [(Ref Player) (Ref Block)] Int))
+(defn get-x-distance [player block]
+ (let [player-x-pos @(Player.x-pos player)
+       block-x-pos  @(Block.x-pos block)
+       block-width @(Block.w block)]
+  (if (< player-x-pos block-x-pos)
+      block-x-pos
+      (if (> player-x-pos (+ block-width block-x-pos))
+          (+ block-width block-x-pos)
+          player-x-pos))))
 
 (sig player-colliding-with-block? (Fn [(Ref Player) (Ref Block)] Bool))
 (defn player-colliding-with-block? [player block]
-  (let [dist-x (- @(Player.x-pos player) (get-x-collision player block))
-        dist-y (- @(Player.y-pos player) (get-y-collision player block))
+  (let [dist-x (- @(Player.x-pos player) (get-x-distance player block))
+        dist-y (- @(Player.y-pos player) (get-y-distance player block))
         distance (Float.sqrt (Float.from-int (+ (* dist-x dist-x) (* dist-y dist-y))))]
    (<= distance (Float.from-int player-radius))))
 
 ; Had to comment out the sig because the compiler complains about the lambda
-;(sig players-colliding-with-block? (Fn [(Ref Player) (Ref (Array Block))] Bool))
+; (sig player-colliding-with-blocks? (Fn [(Ref Player) (Ref (Array Block))] ()))
 (defn player-colliding-with-blocks? [player blocks]
  (any?
     &(fn [block]

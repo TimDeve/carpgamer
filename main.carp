@@ -70,7 +70,8 @@
     WorldState.Intro (Arcada.Canvas.draw-filled-rect 0 0 100 10 Colors.light-blue)
     _                ()))
 
-;(sig maybe-draw-debug (Fn [(Ref Player) (Ref (Array Block))] ()))
+; Had to comment out the sig because the compiler complains about the lambda
+; (sig maybe-draw-debug (Fn [(Ref Player) (Ref (Array Block))] ()))
 (defn maybe-draw-debug [player blocks]
   (if debug
     (with Arcada.Canvas
