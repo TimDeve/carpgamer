@@ -17,7 +17,7 @@
   (if (< px bx)
     bx
     (if (> px (+ bw bx))
-      (+ bx bx)
+      (+ bw bx)
       px))))
 
 (sig player-colliding-with-block? (Fn [(Ref Player) (Ref Block)] Bool))
