@@ -8,6 +8,7 @@
 (load "src/models.carp")
 (load "src/collisions.carp")
 (load "src/colors.carp")
+(load "src/patterns.carp")
 
 (use Array)
 
@@ -21,9 +22,7 @@
   (World.init
     (WorldState.Running)
     (Player.init (/ screen-width 2) (/ screen-height 2))
-    [(Block.init 195 22 10 30 (Direction.Left))
-     (Block.init 235 30 10 20 (Direction.Left))
-     (Block.init 235 70 10 20 (Direction.Left))]))
+    @(OffsetBlocks.blocks &(gen-wave-from-right 160))))
 
 (sig init-intro-world (Fn [] World))
 (defn init-intro-world []
@@ -75,12 +74,12 @@
   (if debug
     (with Arcada.Canvas
       (do
-        (draw-text 0 90 1 (String.concat &[@"Player:"
+        (draw-text 0 0 1 (String.concat &[@"Player:"
                                            @" "
                                            (str (Player.x-pos player))
                                            @" "
                                            (str (Player.y-pos player))]))
-        (draw-text 0 100 1 (String.concat
+        (draw-text 0 10 1 (String.concat
                               &(Array.copy-map
                                  &(fn [block]
                                       (String.concat
