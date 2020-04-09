@@ -77,12 +77,12 @@
   (if debug
     (with Arcada.Canvas
       (do
-        (draw-text 0 0 1 (String.concat &[@"Player:"
+        (draw-text 0 0 1 &(String.concat &[@"Player:"
                                            @" "
                                            (str (Player.x-pos player))
                                            @" "
                                            (str (Player.y-pos player))]))
-        (draw-text 0 10 1 (String.concat
+        (draw-text 0 10 1 &(String.concat
                               &(Array.copy-map
                                  &(fn [block]
                                       (String.concat

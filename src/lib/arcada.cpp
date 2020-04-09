@@ -60,11 +60,11 @@ void CanvasDrawFilledCirc(int16_t x0, int16_t y0, int16_t r, uint16_t color)
   canvas->fillCircle(x0, y0, r, color);
 }
 
-void CanvasDrawText(int x, int y, int size, char *str)
+void CanvasDrawText(int x, int y, int size, char **str)
 {
   canvas->setCursor(x, y);
   canvas->setTextSize(size);
-  canvas->print(str);
+  canvas->print(*str);
 }
 
 void CanvasBlit(int x, int y)
