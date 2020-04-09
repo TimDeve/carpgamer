@@ -1,5 +1,7 @@
 (system-include "Arduino.h")
 
+(load "git@github.com:TimDeve/pair-spread@v0.1.0")
+
 (load "config.carp")
 
 (load "src/lib/serial.carp")
@@ -22,7 +24,8 @@
   (World.init
     (WorldState.Running)
     (Player.init (/ screen-width 2) (/ screen-height 2))
-    @(OffsetBlocks.blocks &(gen-wave-from-right 160))))
+    (Pair.spread [_offset blocks (gen-wave-from-right 160)]
+      blocks)))
 
 (sig init-intro-world (Fn [] World))
 (defn init-intro-world []

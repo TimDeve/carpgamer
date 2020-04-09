@@ -1,10 +1,8 @@
 (load "src/models.carp")
 
-(deftype OffsetBlocks [offset Int blocks (Array Block)])
-
-(sig gen-wave-from-right (Fn [Int] OffsetBlocks))
+(sig gen-wave-from-right (Fn [Int] (Pair Int (Array Block))))
 (defn gen-wave-from-right [offset]
-  (OffsetBlocks.init
+  (Pair.init
     (+ offset 160)
     [(Block.init offset         30 10 10 (Direction.Left))
      (Block.init offset         60 10 30 (Direction.Left))
