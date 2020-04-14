@@ -7,6 +7,7 @@
 (load "src/lib/serial.carp")
 (load "src/lib/arcada.carp")
 (load "src/lib/sys.carp")
+(load "src/lib/analog.carp")
 (load "src/models.carp")
 (load "src/collisions.carp")
 (load "src/colors.carp")
@@ -19,12 +20,16 @@
 (def screen-width 160)
 (def screen-height 128)
 
+(sig gen-random-seed (Fn [] Double))
+(defn gen-random-seed []
+  (Double.from-long (+ (Sys.micros) (Long.from-int (Analog.read 3)))))
+
 (sig init-world (Fn [] World))
 (defn init-world []
   (World.init
     (WorldState.Running)
     (Player.init (/ screen-width 2) (/ screen-height 2))
-    (Pair.spread [_offset blocks (gen-wave-from-right 160)]
+    (Pair.spread [_offset blocks (gen-alternate-from-right 160)]
       blocks)))
 
 (sig init-intro-world (Fn [] World))
@@ -227,6 +232,7 @@
    (Arcada.init)
    (init-display)
    (Arcada.Canvas.init screen-width screen-height)
+   (Random.seed-from (gen-random-seed))
    (game-loop (init-intro-world))))
 
 ; Don't need loop but it needs to be declared to make Arduino happy

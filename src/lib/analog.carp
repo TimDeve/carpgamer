@@ -1,0 +1,2 @@
+(defmodule Analog
+ (register read (Fn [Int] Int) "analogRead"))

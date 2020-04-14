@@ -1,3 +1,5 @@
 (defmodule Sys
-  (register delay (Fn [Int] ()) "delay"))
+  (register delay (Fn [Int] ()) "delay")
+  (register millis (Fn [] Long) "millis")
+  (register micros (Fn [] Long) "micros"))
 

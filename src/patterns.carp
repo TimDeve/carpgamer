@@ -1,7 +1,7 @@
 (load "src/models.carp")
 
-(sig gen-wave-from-right (Fn [Int] (Pair Int (Array Block))))
-(defn gen-wave-from-right [offset]
+(sig gen-wave-start-top-from-right (Fn [Int] (Pair Int (Array Block))))
+(defn gen-wave-start-top-from-right [offset]
   (Pair.init
     (+ offset 160)
     [(Block.init offset         30 10 10 (Direction.Left))
@@ -31,3 +31,19 @@
      (Block.init (+ offset 160) 30 10 10 (Direction.Left))
      (Block.init (+ offset 160) 60 10 30 (Direction.Left))]))
 
+
+(sig gen-alternate-from-right (Fn [Int] (Pair Int (Array Block))))
+(defn gen-alternate-from-right [offset]
+  (Pair.init
+    (+ offset 150)
+    [(Block.init offset         55 10 40 (Direction.Left))
+
+     (Block.init (+ offset 30)  35 10 40 (Direction.Left))
+
+     (Block.init (+ offset 60)  55 10 40 (Direction.Left))
+
+     (Block.init (+ offset 90)  35 10 40 (Direction.Left))
+
+     (Block.init (+ offset 120) 55 10 40 (Direction.Left))
+
+     (Block.init (+ offset 150) 35 10 40 (Direction.Left))]))
