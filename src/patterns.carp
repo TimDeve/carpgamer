@@ -3,39 +3,38 @@
 (sig gen-wave-start-top-from-right (Fn [Int] (Pair Int (Array Block))))
 (defn gen-wave-start-top-from-right [offset]
   (Pair.init
-    (+ offset 160)
-    [(Block.init offset         30 10 10 (Direction.Left))
-     (Block.init offset         60 10 30 (Direction.Left))
+    (+ offset 210)
+    [(Block.init (+ offset 30)  30 10 10 (Direction.Left))
+     (Block.init (+ offset 30)  60 10 30 (Direction.Left))
 
-     (Block.init (+ offset 20)  30 10 15 (Direction.Left))
-     (Block.init (+ offset 20)  65 10 25 (Direction.Left))
+     (Block.init (+ offset 50)  30 10 15 (Direction.Left))
+     (Block.init (+ offset 50)  65 10 25 (Direction.Left))
 
-     (Block.init (+ offset 40)  30 10 20 (Direction.Left))
-     (Block.init (+ offset 40)  70 10 20 (Direction.Left))
+     (Block.init (+ offset 70)  30 10 20 (Direction.Left))
+     (Block.init (+ offset 70)  70 10 20 (Direction.Left))
 
-     (Block.init (+ offset 60)  30 10 25 (Direction.Left))
-     (Block.init (+ offset 60)  75 10 15 (Direction.Left))
+     (Block.init (+ offset 90)  30 10 25 (Direction.Left))
+     (Block.init (+ offset 90)  75 10 15 (Direction.Left))
 
-     (Block.init (+ offset 80)  30 10 30 (Direction.Left))
-     (Block.init (+ offset 80)  80 10 10 (Direction.Left))
+     (Block.init (+ offset 110)  30 10 30 (Direction.Left))
+     (Block.init (+ offset 110)  80 10 10 (Direction.Left))
 
-     (Block.init (+ offset 100) 30 10 25 (Direction.Left))
-     (Block.init (+ offset 100) 75 10 15 (Direction.Left))
+     (Block.init (+ offset 130) 30 10 25 (Direction.Left))
+     (Block.init (+ offset 130) 75 10 15 (Direction.Left))
 
-     (Block.init (+ offset 120) 30 10 20 (Direction.Left))
-     (Block.init (+ offset 120) 70 10 20 (Direction.Left))
+     (Block.init (+ offset 150) 30 10 20 (Direction.Left))
+     (Block.init (+ offset 150) 70 10 20 (Direction.Left))
 
-     (Block.init (+ offset 140) 30 10 15 (Direction.Left))
-     (Block.init (+ offset 140) 65 10 25 (Direction.Left))
+     (Block.init (+ offset 170) 30 10 15 (Direction.Left))
+     (Block.init (+ offset 170) 65 10 25 (Direction.Left))
 
-     (Block.init (+ offset 160) 30 10 10 (Direction.Left))
-     (Block.init (+ offset 160) 60 10 30 (Direction.Left))]))
-
+     (Block.init (+ offset 190) 30 10 10 (Direction.Left))
+     (Block.init (+ offset 190) 60 10 30 (Direction.Left))]))
 
 (sig gen-alternate-from-right (Fn [Int] (Pair Int (Array Block))))
 (defn gen-alternate-from-right [offset]
   (Pair.init
-    (+ offset 150)
+    (+ offset 160)
     [(Block.init offset         55 10 40 (Direction.Left))
 
      (Block.init (+ offset 30)  35 10 40 (Direction.Left))
@@ -47,3 +46,21 @@
      (Block.init (+ offset 120) 55 10 40 (Direction.Left))
 
      (Block.init (+ offset 150) 35 10 40 (Direction.Left))]))
+
+(sig pick-pattern (Fn [Int] (Pair Int (Array Block))))
+(defn pick-pattern [offset]
+  (let [r (Int.random-between 0 10)]
+    (if (< r 7)
+      (gen-alternate-from-right offset)
+      (gen-wave-start-top-from-right offset))))
+
+;(sig gen-patterns (Fn [Int] (Pair Int (Array Block))))
+(defn gen-patterns [offset]
+  (reduce &(fn [acc _]
+            (Pair.spread [acc-offset acc-blocks acc]
+              (Pair.spread [new-offset new-blocks (pick-pattern acc-offset)]
+                (Pair.init
+                  (+ 20 new-offset)
+                  (Array.concat &[acc-blocks new-blocks])))))
+          (Pair.init offset [])
+          &(range 0 4 1)))

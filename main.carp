@@ -29,7 +29,7 @@
   (World.init
     (WorldState.Running)
     (Player.init (/ screen-width 2) (/ screen-height 2))
-    (Pair.spread [_offset blocks (gen-alternate-from-right 160)]
+    (Pair.spread [_offset blocks (gen-patterns 160)]
       blocks)))
 
 (sig init-intro-world (Fn [] World))
